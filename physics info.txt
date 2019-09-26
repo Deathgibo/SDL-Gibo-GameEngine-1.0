@@ -1,0 +1,189 @@
+once you have both lines and equal
+
+
+if both have 0 slopes:*cant divide by zero
+	if y is same:
+		return true
+	else:
+		return false
+if both are undefined slopes:
+	figure out if both are undefined
+	if x's are the same:
+		return true
+	else:
+		return false
+
+if one is undefined:
+	figure out if its undefined
+	if it is find x point
+	now its the same just different logic
+	find y at which other line hits x
+	now see if both are within x and y
+
+if you have no undefined slopes:
+	nonvalid solution:
+		they are not hitting return false
+
+	valid solution:
+		see if point they hit at if both lines boundaries contain that x (do y as well)
+		if both are within:
+			return true
+		else:
+			return false
+	
+
+
+
+
+SDL_SetRenderDrawColor(grender, 100, 150, 50, 0);
+	SDL_RenderDrawLine(grender, one.x, one.y, one2.x, one2.y);
+	SDL_SetRenderDrawColor(grender, 0, 100, 100, 0);
+	SDL_RenderDrawLine(grender, two.x, two.y, two2.x, two2.y);
+
+	//helper
+	double larger1y = one.y;
+	double smaller1y = one2.y;
+	double larger1x = one.x;
+	double smaller1x = one2.x;
+	double larger2x = two.x;
+	double smaller2x = two2.x;
+	double larger2y = two.y;
+	double smaller2y = two2.y;
+	if (two2.x > two.x)
+	{
+		larger2x = two2.x;
+		smaller2x = two.x;
+	}
+	if (two2.y > two.y)
+	{
+		larger2y = two2.y;
+		smaller2y = two.y;
+	}
+	if (one2.x > one.x)
+	{
+		larger1x = one2.x;
+		smaller1x = one.x;
+	}
+	if (one2.y > one.y)
+	{
+		larger1y = one2.y;
+		smaller1y = one.y;
+	}
+
+	double slope1 = 0;
+	double b1 = 0;//is the b intercept if horizontal line its the y if vertical its the x
+	bool undefined1 = false;
+	bool zero1 = false;
+	if (one2.x == one.x)
+	{
+		undefined1 = true;
+		b1 = one.x;
+	}
+	else if (one2.y == one.y)
+	{
+		zero1 = true;
+		b1 = one.y;
+	}
+	else
+	{
+		slope1 = (one2.y - one.y) / (one2.x - one.x);
+		b1 = one2.y - slope1 * one2.x;
+	}
+
+	double slope2 = 0;
+	double b2 = 0;
+	bool undefined2 = false;
+	bool zero2 = false;
+	if (two2.x == two.x)
+	{
+		undefined2 = true;
+		b2 = two.x;
+	}
+	else if (two2.y == two.y)
+	{
+		zero2 = true;
+		b2 = two.y;
+	}
+	else
+	{
+		slope2 = (two2.y - two.y) / (two2.x - two.x);
+		b2 = two2.y - slope2 * two2.x;
+	}
+	
+	if (zero1 && zero2 == 1)
+	{
+		if (one.y == two.y)
+		{
+			double largestx = larger2x;
+			if (larger1x > larger2x)
+			{
+				if (larger1x - smaller1x >= larger1x - larger2x)
+				{
+					return true;
+				}
+			}
+			else
+			{
+				if (larger2x - smaller2x >= larger2x - larger1x)
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	else if (undefined1 && undefined2 == 1)
+	{
+		if (one.x == two.x)
+		{
+			double largesty = larger2y;
+			if (larger1y > larger2y)
+			{
+				if (larger1y - smaller1y >= larger1y - larger2y)
+				{
+					return true;
+				}
+			}
+			else
+			{
+				if (larger2y - smaller2y >= larger2y - larger1y)
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	else if (undefined1 || undefined2 == 1)
+	{
+		double y = 0;
+		double x = 0;
+		if (undefined1 == 1)
+		{
+			y = slope2 * b1 + b2;
+			x = b1;
+		}
+		else
+		{
+			y = slope1 * b2 + b1;
+			x = b2;
+		}
+		if ((y <= larger1y && y >= smaller1y) && (y <= larger2y && y >= smaller2y))//safe check with x?
+		{
+			if ((x <= larger1x && x >= smaller1x) && (x <= larger2x && x >= smaller2x))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	else
+	{
+		double x = (b2 - b1) / (slope1 - slope2);
+		if ((x <= larger1x && x >= smaller1x) && (x <= larger2x && x >= smaller2x))//safe check with y?
+		{
+			return true;
+		}
+		return false;
+	}
+	

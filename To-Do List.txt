@@ -1,0 +1,8 @@
+-stuff for future-
+get rendering so you can actually fill shapes in with colors, textures, or even images
+tiddy up physics making more efficeint as well as making moving objects work
+get full copies of shapes
+
+
+
+test and test now and add little bits!

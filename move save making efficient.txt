@@ -1,0 +1,133 @@
+void Player::Move(vector<Shapes*> theshapes, SDL_Renderer * grender)
+{
+	/*error fix info
+	there were wierd bugs but I think it was all dealing with precision. The player position I made doubles and just casted when printing
+	and the cos and sin values I rounded to 3 decimal places to avoid weird .0008 stuff this seemse to work now. It was just precision errors
+	*/
+	/*corner error fix
+	in real life you dont move x and y then check like go in the ground and move right then check.
+	So I move y first then deal with y physics. then move x and deal with x physics. this has to run the physics twice though. but can make efficient with circle
+	*/
+	/*slope error fix
+	just see if the slope isnt horinzontal or vertical then get the ratio of x to y by 1/slope move x one then move y to that ratio. It automatically takes care of x slow down
+	because y moves up then it tries to go right if it hits then y goes up again. clean.
+	*/
+	/*multiple object fix
+	made it so it checks x first because x changes y but y doesnt change x. So x changes y then we can update y and from there the y can take care of it.
+	*/
+	/*moving object error fix
+	*/
+	//playery += yvelocity;
+
+	
+	bool ychangedfromslope = false;
+	double initialyvelocity = yvelocity;
+	double initialplayery = playery;
+	double ychangeamount = 0;
+	double xchangeamount = 0;
+	//see if we are hitting a slope before anything. if we are then change x and y velocity accordingly
+	int xvelocitysign = 1;
+	if (xvelocity < 0)
+		xvelocitysign = -1;
+	int yvelocitysign = 1;
+	if (yvelocity < 0)
+		yvelocitysign = -1;
+	playerx += xvelocitysign;
+	playery += yvelocitysign;
+
+	UpdateHitBox();
+	IsPlayerHittingAnyShapes(theshapes, grender);
+	double howmuchymoveswithx = 0;//ratio of x to y if x moves 3 y moves 3 * this
+	for (int i = 0; i < playercollisioninfo.size(); i++)
+	{
+		if (playercollisioninfo[i].lineslope != 0)//horizontal or vertical
+		{
+			if (xvelocity != 0 && yvelocity != 0)
+			{
+				ychangedfromslope = true;
+				xchangeamount = (xvelocity * ((cos((playercollisioninfo[i].lineangle * 3.14) / 180) * 1000.0) / 1000.0));//playerx
+				ychangeamount = -abs(playercollisioninfo[i].lineslope);
+			}
+		}
+		UpdateHitBox();
+	}
+	playerx -= xvelocitysign;
+	playery -= yvelocitysign;
+	if (ychangedfromslope)
+	{
+		yvelocity += ychangeamount * abs(xchangeamount) - 1;//-1 to add protection against slope misclaculations to not go through wall
+		yvelocity -= playergravity;
+		//yvelocity += -5;
+	}
+	yvelocitysign = 1;
+	if (yvelocity < 0)
+		yvelocitysign = -1;
+	for (int x = 0; x < abs(yvelocity); x++)
+	{
+		playery += yvelocitysign;
+		UpdateHitBox();
+		IsPlayerHittingAnyShapes(theshapes, grender);
+		for (int i = 0; i < playercollisioninfo.size(); i++)
+		{
+			if (playercollisioninfo[i].sidehit == 0 || playercollisioninfo[i].sidehit == 2)
+			{
+				if ((round(cos((playercollisioninfo[i].lineangle * 3.14) / 180) * 1000.0) / 1000.0) > .001)
+				{
+					playery -= yvelocitysign;
+				}
+				else
+				{
+					//cout << "sup";
+				}
+			}
+			UpdateHitBox();
+		}
+	}
+	if (ychangedfromslope && xvelocity == 0)//expecting to move right so we move up slope but if x doesnt change
+	{
+		playery = initialplayery;
+	}
+	if (ychangedfromslope)
+	{
+		xvelocity = xchangeamount;
+	}
+	xvelocitysign = 1;
+	if (xvelocity < 0)
+		xvelocitysign = -1;
+	double extraamount = 0;
+	if (ychangedfromslope)
+		extraamount = 1;
+	cout << xvelocity << endl;
+	for (int x = 0; x < abs(xvelocity) + extraamount; x++)
+	{
+		playerx += xvelocitysign;
+		UpdateHitBox();
+		IsPlayerHittingAnyShapes(theshapes, grender);
+		for (int i = 0; i < playercollisioninfo.size(); i++)
+		{
+			if (playercollisioninfo[i].sidehit == 1 || playercollisioninfo[i].sidehit == 3)
+			{
+				if ((round(sin((playercollisioninfo[i].lineangle * 3.14) / 180) * 1000.0) / 1000.0) <= .001)//horizontal line
+				{
+				}
+				else if (playercollisioninfo[i].lineslope == 0) //vertical
+				{
+					playerx -= xvelocitysign;
+				}
+				else
+				{
+					if (ychangedfromslope)
+					{
+						playerx -= xvelocitysign;
+						UpdateHitBox();
+						break;
+					}
+					playerx -= xvelocitysign;
+				}
+			}
+			UpdateHitBox();
+		}
+	}
+	xvelocity = 0;
+	yvelocity = 0;
+}
